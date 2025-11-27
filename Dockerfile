@@ -5,13 +5,13 @@ FROM node:20 AS builder
 WORKDIR /app
 
 # Copy frontend package.json & package-lock.json from chat-frontend
-COPY chat-frontend/package*.json ./
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy all frontend files
-COPY chat-frontend/ ./
+COPY . .
 
 # Build the app
 RUN npm run build
