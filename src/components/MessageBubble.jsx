@@ -2,7 +2,9 @@ import React from "react";
 import "./MessageBubble.css";
 
 export default function MessageBubble({ msg, currentUserId }) {
-  const isSender = msg.sender.id === currentUserId;
+  const senderId = msg.sender?._id || msg.sender?.id || msg.sender;
+  const isSender = senderId === currentUserId;
+
 
   return (
     <div className={`message-bubble ${isSender ? "sender" : "receiver"}`}>

@@ -24,7 +24,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
           <MessageBubble 
             key={i} 
             msg={msg} 
-            className={msg.sender.id === user.id ? "self" : "other"}
+            className={user._id || user.id}
             />
           ))}
       </div>
