@@ -3,11 +3,9 @@ import "./MessageBubble.css";
 
 export default function MessageBubble({ msg, currentUserId }) {
   const senderId = msg.sender?._id || msg.sender?.id || msg.sender;
-const normalizedSenderId = senderId?.toString();
-const normalizedCurrentUserId = currentUserId?.toString();
-
-const isSender = normalizedSenderId === normalizedCurrentUserId;
-console.log("sender =", senderId, "currentUser =", currentUserId, "isSender =", isSender);
+  const isSender = senderId?.toString() === currentUserId?.toString();
+  
+  console.log("sender =", senderId, "currentUser =", currentUserId, "isSender =", isSender);
 
   return (
     <div className={`message-bubble ${isSender ? "sender" : "receiver"}`}>
