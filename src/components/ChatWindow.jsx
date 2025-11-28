@@ -29,7 +29,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
 
       <div className="chat-messages">
         {messages.map((msg, i) => (
-          <MessageBubble key={i} msg={msg} currentUserId={user._id} />
+          <MessageBubble key={i} msg={msg} currentUserId={user?._id || user?.id} />
         ))}
         <div ref={messagesEndRef} />
       </div>
