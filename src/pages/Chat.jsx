@@ -8,7 +8,7 @@ export default function Chat() {
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
   const [socket, setSocket] = useState(null);
-  const [currentRoom, setCurrentRoom] = useState(null);
+  const [currentRoom, setCurrentRoom] = useState("69292e93d4ac2dfa35e720db");
   const [messages, setMessages] = useState([]);
 
   // Initialize socket
