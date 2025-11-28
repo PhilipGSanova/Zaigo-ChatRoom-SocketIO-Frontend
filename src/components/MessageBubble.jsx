@@ -7,6 +7,7 @@ const normalizedSenderId = senderId?.toString();
 const normalizedCurrentUserId = currentUserId?.toString();
 
 const isSender = normalizedSenderId === normalizedCurrentUserId;
+console.log("sender =", senderId, "currentUser =", currentUserId, "isSender =", isSender);
 
   return (
     <div className={`message-bubble ${isSender ? "sender" : "receiver"}`}>
