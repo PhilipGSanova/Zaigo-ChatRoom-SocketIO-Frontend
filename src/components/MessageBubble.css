@@ -4,7 +4,7 @@
   max-width: 75%;
   word-wrap: break-word;
   margin-bottom: 0.5rem;
-  display: inline-block;
+  display: block;
   position: relative;
   font-size: 0.95rem;
 }
