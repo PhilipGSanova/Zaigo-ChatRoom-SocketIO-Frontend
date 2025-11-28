@@ -1,15 +1,19 @@
 import React from "react";
-import "./MessageBubble.css"; // make sure this exists
+import "./MessageBubble.css";
 
 export default function MessageBubble({ msg, currentUserId }) {
-  const isSender = msg.userId === currentUserId;
+  const senderId = msg.sender?._id || msg.sender?.id || msg.sender;
+  const isSender = senderId === currentUserId;
+
+  console.log("sender =", senderId, "currentUser =", currentUserId, "isSender =", isSender);
+
 
   return (
     <div className={`message-bubble ${isSender ? "sender" : "receiver"}`}>
-      {msg.text}
-      <span className="timestamp">
-        {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-      </span>
+      <span className="username">{msg.sender.username}: </span>
+      <span className="text">{msg.text}</span>
+      <span className="timestamp">{new Date(msg.createdAt).toLocaleTimeString()}</span>
     </div>
   );
 }
+
