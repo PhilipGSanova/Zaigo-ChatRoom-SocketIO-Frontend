@@ -14,7 +14,7 @@ export default function Chat() {
   async function loadMessages(roomId) {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/rooms/${roomId}`,
+        `${import.meta.env.VITE_API_URL}/api/messages/${roomId}`,
         {
           method: "GET",
           credentials: "include",
