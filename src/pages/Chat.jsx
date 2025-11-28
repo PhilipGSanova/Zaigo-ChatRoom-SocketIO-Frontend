@@ -14,7 +14,7 @@ export default function Chat() {
   async function loadMessages(roomId) {
     try {
       const res = await fetch(
-        `https://zaigo-chatroom-socketio-backend.onrender.com/api/messages/${roomId}`,
+        `${import.meta.env.VITE_API_URL}/api/rooms/${roomId}`,
         {
           method: "GET",
           credentials: "include",
