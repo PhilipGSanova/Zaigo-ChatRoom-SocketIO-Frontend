@@ -30,21 +30,18 @@ export default function MessageBubble({ msg, currentUserId }) {
       {msg.text && <span className="text">{msg.text}</span>}
 
       {/* --- Image Attachments --- */}
-      {msg.attachments?.length > 0 &&
-        msg.attachments.map((att, index) =>
-          att.mime?.startsWith("image/") ? (
+      {msg.attachments && msg.attachments.length > 0 &&
+        msg.attachments.map((att) => (
+          att.mime.startsWith("image/") && (
             <img
-              key={index}
-              src={
-                att.url.startsWith("data")
-                  ? att.url // base64 voice/image
-                  : `${import.meta.env.VITE_API_URL}${att.url}` // backend URL
-              }
-              alt={att.filename || "image"}
+              key={att._id || att.filename}
               className="message-image"
+              src={att.url.startsWith("http") ? att.url : `${import.meta.env.VITE_API_URL || "https://zaigo-chatroom-socketio-backend.onrender.com"}${att.url}`}
+              alt={att.filename}
             />
-          ) : null
-        )}
+          )
+        ))
+      }
 
       {/* Timestamp */}
       <span className="timestamp">
