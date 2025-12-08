@@ -36,8 +36,11 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
 
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        console.log("Audio blob created:", audioBlob); // <-- add this line
         const reader = new FileReader();
         reader.onloadend = () => {
+          const base64Audio = reader.result;
+    console.log("Base64 audio:", base64Audio.slice(0, 50) + "..."); // first 50 chars
           socket.emit("send_voice_message", {
             roomId: currentRoom._id,
             audio: reader.result,
@@ -87,6 +90,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
         >
           🎤
         </button>
+        {recording && <span style={{ color: "red", marginLeft: "10px" }}>Recording…</span>}
       </div>
     </div>
   );
