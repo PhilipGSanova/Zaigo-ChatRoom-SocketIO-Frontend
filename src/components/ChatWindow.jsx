@@ -94,6 +94,9 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     try {
       const response = await fetch("https://zaigo-chatroom-socketio-backend.onrender.com/api/messages/image", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: formData,
       });
 
