@@ -7,6 +7,13 @@ export default function MessageBubble({ msg, currentUserId }) {
 
   console.log("sender =", senderId, "currentUser =", currentUserId, "isSender =", isSender);
 
+  if (msg.audio) {
+    return (
+      <div className={`message-bubble ${isSender ? "sender" : "receiver"}`}>
+        <audio controls src={msg.audio}></audio>
+      </div>
+    );
+  }
 
   return (
     <div className={`message-bubble ${isSender ? "sender" : "receiver"}`}>
