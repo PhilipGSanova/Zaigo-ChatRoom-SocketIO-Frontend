@@ -80,6 +80,32 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
     }
   };
 
+  const [selectedImage, setSelectedImage] = useState(null);
+  const imageInputRef = useRef(null);
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+
+    formData.append("roomId", currentRoom._id);
+    formData.append("senderId", user._id);
+    formData.append("attachment", file);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/image-upload/image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const message = await response.json();
+
+      if (typeof addMessage === "function") addMessage(message);
+    } catch (err) {
+      console.error("Image upload failed:", err);
+    }
+  };
 
   return (
     <div className="chat-window">
@@ -104,6 +130,14 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
         <button onClick={sendMessage}>Send</button>
+        <input
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          ref={imageInputRef}
+          onChange={handleImageChange}
+        />
+        <button onClick={() => imageInputRef.current?.click()}>📷</button>
         <button className="mic-btn" onClick={toggleRecording}>
           {recording ? "⏹️" : "🎤"}
         </button>
