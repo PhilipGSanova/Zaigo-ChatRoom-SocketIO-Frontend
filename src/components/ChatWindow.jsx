@@ -84,7 +84,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
         <button onClick={sendMessage}>Send</button>
-        <button className="mic-btn" onMouseDown={startRecording} onMouseUp={stopRecording}>🎤</button>
+        <button className="mic-btn" onMouseDown={startRecording} onMouseUp={stopRecording}>Record</button>
       </div>
     </div>
   );
