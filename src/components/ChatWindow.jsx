@@ -39,7 +39,6 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
 
         reader.onloadend = () => {
           const base64Audio = reader.result;
-
           socket.emit("send_voice_message", {
             roomId: currentRoom._id,
             audio: base64Audio,
@@ -84,7 +83,9 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
         <button onClick={sendMessage}>Send</button>
-        <button className="mic-btn" onMouseDown={startRecording} onMouseUp={stopRecording}>Record</button>
+        <button className="mic-btn" onMouseDown={startRecording} onMouseUp={stopRecording}>
+          {recording ? "Stop" : "Record"}
+        </button>
       </div>
     </div>
   );
