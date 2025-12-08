@@ -21,15 +21,13 @@
 }
 
 /* Input area */
-/* Send button only (mic button excluded) */
-.chat-input-container button:not(.mic-btn) {
-  background-color: #3b82f6;
-  color: white;
-  padding: 0 1.5rem;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+.chat-input-container {
+  display: flex;
+  padding: 1rem;
+  gap: 0.5rem;
+  background-color: #1f2937;
 }
+
 
 
 /* Text input */
@@ -44,9 +42,9 @@
   font-size: 1rem;
 }
 
-/* Send button */
-.chat-input-container button {
-  background-color: #3b82f6; /* blue-500 */
+/* Send button only (mic excluded) */
+.chat-input-container button:not(.mic-btn) {
+  background-color: #3b82f6;
   color: white;
   padding: 0 1.5rem;
   border-radius: 0.75rem;
@@ -54,8 +52,8 @@
   transition: background-color 0.2s ease;
 }
 
-.chat-input-container button:hover {
-  background-color: #2563eb; /* blue-600 */
+.chat-input-container button:not(.mic-btn):hover {
+  background-color: #2563eb;
 }
 
 /* Voice Recording Button */
