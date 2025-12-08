@@ -39,16 +39,31 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
 
         mediaRecorder.onstop = () => {
           const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-          console.log("Audio blob created:", audioBlob);
-
           const reader = new FileReader();
+
           reader.onloadend = () => {
             const base64Audio = reader.result;
-            console.log("Base64 audio:", base64Audio.slice(0, 50) + "..."); // preview
+
+            // Emit to server
             socket.emit("send_voice_message", {
               roomId: currentRoom._id,
               audio: base64Audio,
             });
+
+            // Optimistically add to chat immediately
+            const tempMessage = {
+              _id: Date.now(), // temporary id
+              sender: user._id,
+              text: null,
+              attachments: [{ url: base64Audio, filename: "voice-message.webm", mime: "audio/webm" }],
+              createdAt: new Date(),
+            };
+
+            // Assuming `messages` is state in parent component, you might need a prop function to update it
+            // For example, if parent passed `setMessages`, call: setMessages(prev => [...prev, tempMessage]);
+            if (typeof addMessage === "function") {
+              addMessage(tempMessage);
+            }
           };
           reader.readAsDataURL(audioBlob);
         };
@@ -64,6 +79,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
       setRecording(false);
     }
   };
+
 
   return (
     <div className="chat-window">
