@@ -23,42 +23,46 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
     return <div className="chat-window">Select a room or friend to start chatting</div>;
   }
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+  // Toggle recording on button click
+  const toggleRecording = async () => {
+    if (!recording) {
+      // START recording
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
 
-      mediaRecorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
-      };
-
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        console.log("Audio blob created:", audioBlob); // <-- add this line
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64Audio = reader.result;
-    console.log("Base64 audio:", base64Audio.slice(0, 50) + "..."); // first 50 chars
-          socket.emit("send_voice_message", {
-            roomId: currentRoom._id,
-            audio: reader.result,
-          });
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunksRef.current.push(event.data);
         };
-        reader.readAsDataURL(audioBlob);
-      };
 
-      mediaRecorder.start();
-      setRecording(true);
-    } catch (err) {
-      console.error("Mic access denied:", err);
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          console.log("Audio blob created:", audioBlob);
+
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64Audio = reader.result;
+            console.log("Base64 audio:", base64Audio.slice(0, 50) + "..."); // preview
+            socket.emit("send_voice_message", {
+              roomId: currentRoom._id,
+              audio: base64Audio,
+            });
+          };
+          reader.readAsDataURL(audioBlob);
+        };
+
+        mediaRecorder.start();
+        setRecording(true);
+      } catch (err) {
+        console.error("Mic access denied:", err);
+      }
+    } else {
+      // STOP recording
+      mediaRecorderRef.current?.stop();
+      setRecording(false);
     }
-  };
-
-  const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
-    setRecording(false);
   };
 
   return (
@@ -84,11 +88,8 @@ export default function ChatWindow({ messages, socket, currentRoom, user }) {
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
         <button onClick={sendMessage}>Send</button>
-        <button className="mic-btn"
-          onMouseDown={startRecording}
-          onMouseUp={stopRecording}
-        >
-          🎤
+        <button className="mic-btn" onClick={toggleRecording}>
+          {recording ? "⏹️" : "🎤"}
         </button>
         {recording && <span style={{ color: "red", marginLeft: "10px" }}>Recording…</span>}
       </div>
