@@ -9,6 +9,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const imageInputRef = useRef(null);
+  const token = localStorage.getItem("token");
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -92,10 +93,10 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     formData.append("attachment", file);
 
     try {
-      const response = await fetch("https://zaigo-chatroom-socketio-backend.onrender.com/api/messages/image", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/messages/image`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
