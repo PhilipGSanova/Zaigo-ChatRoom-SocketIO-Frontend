@@ -7,8 +7,14 @@
   display: block;
   position: relative;
   font-size: 0.95rem;
-  overflow: hidden;
 }
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 
 /* Messages from the logged-in user */
 .message-bubble.sender {
@@ -26,29 +32,11 @@
   border-bottom-left-radius: 0.25rem;
 }
 
-/* Timestamp */
+
 .message-bubble span.timestamp {
   font-size: 0.7rem;
   color: #9ca3af; /* gray-400 */
   position: absolute;
   bottom: -1.2rem;
   right: 0.5rem;
-}
-
-/* Image attachments */
-.message-bubble .message-image {
-  display: block;
-  max-width: 200px;
-  max-height: 200px;
-  border-radius: 10px;
-  margin-top: 0.5rem;
-  object-fit: cover;
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.2); /* subtle border for sender images */
-}
-
-/* Optional: style audio player inside bubble */
-.message-bubble audio {
-  margin-top: 0.5rem;
-  width: 100%;
 }
