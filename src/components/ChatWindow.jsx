@@ -90,7 +90,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
 
     const formData = new FormData();
     formData.append("roomId", currentRoom._id);
-    formData.append("senderId", user._id);
+    formData.append("senderId", user.id);
     formData.append("attachment", file);
 
     console.log("USER OBJECT =", user);
