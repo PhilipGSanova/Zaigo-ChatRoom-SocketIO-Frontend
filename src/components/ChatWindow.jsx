@@ -93,9 +93,8 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     formData.append("senderId", user._id);
     formData.append("attachment", file);
 
-    console.log("Sending file =", file);
-    console.log("File name =", file?.name);
-    console.log("Mime =", file?.type);
+    console.log("USER OBJECT =", user);
+
 
     try {
       const token = localStorage.getItem("token");
