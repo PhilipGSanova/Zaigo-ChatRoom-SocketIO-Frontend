@@ -19,29 +19,25 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     return <div className="chat-window">Select a room or friend to start chatting</div>;
   }
 
-  // -----------------------------
-  // Send text message
-  // -----------------------------
+  // --- Send text message ---
   const sendMessage = () => {
     if (!text.trim()) return;
 
     const tempMessage = {
       _id: Date.now(),
       sender: { _id: user._id, fullName: user.fullName },
-      text: text.trim(),
+      text,
       attachments: [],
       createdAt: new Date(),
     };
 
-    if (typeof addMessage === "function") addMessage(tempMessage);
+    addMessage(tempMessage); // show instantly
+    socket.emit("send_message", { roomId: currentRoom._id, text });
 
-    socket.emit("send_message", { roomId: currentRoom._id, text: text.trim() });
     setText("");
   };
 
-  // -----------------------------
-  // Voice recording
-  // -----------------------------
+  // --- Toggle voice recording ---
   const toggleRecording = async () => {
     if (!recording) {
       try {
@@ -61,7 +57,6 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
           reader.onloadend = () => {
             const base64Audio = reader.result;
 
-            // Optimistically add voice message
             const tempMessage = {
               _id: Date.now(),
               sender: { _id: user._id, fullName: user.fullName },
@@ -69,14 +64,16 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
               attachments: [{ url: base64Audio, filename: "voice-message.webm", mime: "audio/webm" }],
               createdAt: new Date(),
             };
-            if (typeof addMessage === "function") addMessage(tempMessage);
 
-            // Send to server
+            addMessage(tempMessage); // add to UI instantly
+
+            // send to server
             socket.emit("send_voice_message", {
               roomId: currentRoom._id,
               audio: base64Audio,
             });
           };
+
           reader.readAsDataURL(audioBlob);
         };
 
@@ -91,14 +88,12 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     }
   };
 
-  // -----------------------------
-  // Image upload
-  // -----------------------------
+  // --- Handle image upload ---
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file || !user?._id) return;
 
-    // Create temporary URL to show immediately
+    // create a temporary URL for instant display
     const tempUrl = URL.createObjectURL(file);
 
     const tempMessage = {
@@ -108,9 +103,10 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
       attachments: [{ url: tempUrl, filename: file.name, mime: file.type }],
       createdAt: new Date(),
     };
-    if (typeof addMessage === "function") addMessage(tempMessage);
 
-    // Prepare FormData for actual upload
+    addMessage(tempMessage); // show instantly
+
+    // upload in background
     const formData = new FormData();
     formData.append("roomId", currentRoom._id);
     formData.append("senderId", user.id || user._id);
@@ -125,18 +121,13 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
         body: formData,
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || err.message || "Upload failed");
-      }
+      if (!res.ok) throw new Error("Upload failed");
+      const serverMessage = await res.json();
 
-      const message = await res.json();
-
-      // Optionally replace the temp message with the server response
-      if (typeof addMessage === "function") addMessage(message);
+      // Optional: replace temp message with server message if you want accurate IDs/URLs
+      addMessage(serverMessage, tempMessage._id);
     } catch (err) {
       console.error("Image upload failed:", err);
-      // Could remove temp message if upload fails
     }
   };
 
