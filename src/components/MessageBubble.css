@@ -57,8 +57,11 @@
   font-size: 0.7rem;
   color: #9ca3af; /* gray-400 */
   position: absolute;
-  bottom: -1.2rem;
+  bottom: -1rem;
   right: 0.5rem;
+
+  white-space: nowrap; /* Forces the text to stay on one line */
+  width: max-content;
 }
 
 .message-bubble.sender span.timestamp {
