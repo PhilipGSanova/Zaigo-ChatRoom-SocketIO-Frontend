@@ -93,6 +93,10 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     formData.append("senderId", user._id);
     formData.append("attachment", file);
 
+    console.log("Sending file =", file);
+    console.log("File name =", file?.name);
+    console.log("Mime =", file?.type);
+
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/image-upload/image`, {
