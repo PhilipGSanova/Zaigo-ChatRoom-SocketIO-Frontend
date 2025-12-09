@@ -85,6 +85,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
   // Handle image upload
   // inside ChatWindow component
   const handleImageChange = async (e) => {
+    console.log("Triggered!");
     const file = e.target.files[0];
     if (!file) return;
 
