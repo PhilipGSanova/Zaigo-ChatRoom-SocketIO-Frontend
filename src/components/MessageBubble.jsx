@@ -32,12 +32,8 @@ export default function MessageBubble({ msg, currentUserId }) {
               <img
                 key={att._id || att.filename}
                 className="message-image"
-                src={
-                  att.url.startsWith("http")
-                    ? att.url
-                    : `${import.meta.env.VITE_API_URL || "https://zaigo-chatroom-socketio-backend.onrender.com"}${att.url}`
-                }
-                alt={att.filename}
+                src={att.url}
+                alt={att.filename || "image"}
               />
             );
           }

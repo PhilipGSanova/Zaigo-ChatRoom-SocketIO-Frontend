@@ -83,6 +83,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
   };
 
   // Handle image upload
+  // inside ChatWindow component
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -93,21 +94,27 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     formData.append("attachment", file);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/image-upload/image`, {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/image-upload/image`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // if your route is protected
+          // don't set Content-Type — browser sets correct multipart boundary
         },
         body: formData,
       });
-
-      const message = await response.json();
-
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || err.message || "Upload failed");
+      }
+      const message = await res.json();
+      // addMessage should append to local UI state instantly
       if (typeof addMessage === "function") addMessage(message);
     } catch (err) {
       console.error("Image upload failed:", err);
     }
   };
+
 
   return (
     <div className="chat-window">
