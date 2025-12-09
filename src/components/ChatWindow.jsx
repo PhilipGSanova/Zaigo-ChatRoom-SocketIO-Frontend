@@ -98,6 +98,9 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/image-upload/image`, {
         method: "POST",
         credentials: "include", // IMPORTANT
+        headers: {
+          Authorization: `Bearer ${token}`,   // ← ADD THIS
+        },
         body: formData,         // do NOT set any headers
       });
       if (!res.ok) {
