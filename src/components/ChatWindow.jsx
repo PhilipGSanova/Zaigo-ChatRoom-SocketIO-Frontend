@@ -96,7 +96,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
       console.error("User not ready yet! Cannot send image.");
       return;
     }
-    formData.append("senderId", user.id || user._id);
+    formData.append("senderId", user.id);
     formData.append("attachment", file);
 
     console.log("USER OBJECT =", user);
