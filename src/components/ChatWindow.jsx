@@ -9,7 +9,6 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const imageInputRef = useRef(null);
-  const token = localStorage.getItem("token");
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -20,14 +19,29 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     return <div className="chat-window">Select a room or friend to start chatting</div>;
   }
 
+  // -----------------------------
   // Send text message
+  // -----------------------------
   const sendMessage = () => {
     if (!text.trim()) return;
-    socket.emit("send_message", { roomId: currentRoom._id, text });
+
+    const tempMessage = {
+      _id: Date.now(),
+      sender: { _id: user._id, fullName: user.fullName },
+      text: text.trim(),
+      attachments: [],
+      createdAt: new Date(),
+    };
+
+    if (typeof addMessage === "function") addMessage(tempMessage);
+
+    socket.emit("send_message", { roomId: currentRoom._id, text: text.trim() });
     setText("");
   };
 
-  // Toggle voice recording
+  // -----------------------------
+  // Voice recording
+  // -----------------------------
   const toggleRecording = async () => {
     if (!recording) {
       try {
@@ -47,26 +61,21 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
           reader.onloadend = () => {
             const base64Audio = reader.result;
 
-            // Emit to server
-            socket.emit("send_voice_message", {
-              roomId: currentRoom._id,
-              audio: base64Audio,
-            });
-
-            // Optimistically add to chat immediately
+            // Optimistically add voice message
             const tempMessage = {
               _id: Date.now(),
               sender: { _id: user._id, fullName: user.fullName },
               text: null,
-              attachments: [
-                { url: base64Audio, filename: "voice-message.webm", mime: "audio/webm" },
-              ],
+              attachments: [{ url: base64Audio, filename: "voice-message.webm", mime: "audio/webm" }],
               createdAt: new Date(),
             };
+            if (typeof addMessage === "function") addMessage(tempMessage);
 
-            if (typeof addMessage === "function") {
-              addMessage(tempMessage);
-            }
+            // Send to server
+            socket.emit("send_voice_message", {
+              roomId: currentRoom._id,
+              audio: base64Audio,
+            });
           };
           reader.readAsDataURL(audioBlob);
         };
@@ -82,48 +91,54 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     }
   };
 
-  // Handle image upload
-  // inside ChatWindow component
+  // -----------------------------
+  // Image upload
+  // -----------------------------
   const handleImageChange = async (e) => {
-    console.log("Triggered!");
     const file = e.target.files[0];
     if (!file) return;
 
+    // Create temporary URL to show immediately
+    const tempUrl = URL.createObjectURL(file);
+
+    const tempMessage = {
+      _id: Date.now(),
+      sender: { _id: user._id, fullName: user.fullName },
+      text: null,
+      attachments: [{ url: tempUrl, filename: file.name, mime: file.type }],
+      createdAt: new Date(),
+    };
+    if (typeof addMessage === "function") addMessage(tempMessage);
+
+    // Prepare FormData for actual upload
     const formData = new FormData();
     formData.append("roomId", currentRoom._id);
-    console.log("USER OBJECT BEFORE UPLOAD =", user);
-    if (!user || (!user._id && !user.id)) {
-      console.error("User not ready yet! Cannot send image.");
-      return;
-    }
-    formData.append("senderId", user.id);
+    formData.append("senderId", user.id || user._id);
     formData.append("attachment", file);
-
-    console.log("USER OBJECT =", user);
-
 
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/image-upload/image`, {
         method: "POST",
-        credentials: "include", // IMPORTANT
-        headers: {
-          Authorization: `Bearer ${token}`,   // ← ADD THIS
-        },
-        body: formData,         // do NOT set any headers
+        credentials: "include",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
       });
+
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || err.message || "Upload failed");
       }
+
       const message = await res.json();
-      // addMessage should append to local UI state instantly
+
+      // Optionally replace the temp message with the server response
       if (typeof addMessage === "function") addMessage(message);
     } catch (err) {
       console.error("Image upload failed:", err);
+      // Could remove temp message if upload fails
     }
   };
-
 
   return (
     <div className="chat-window">
