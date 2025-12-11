@@ -92,9 +92,11 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     addMessage(tempMessage); // show instantly
 
     // Upload to backend
+    console.log("Uploading image, user:", user);
+
     const formData = new FormData();
     formData.append("roomId", currentRoom._id);
-    formData.append("senderId", user.id);
+    formData.append("senderId", user.id || user._id);
     formData.append("attachment", file);
 
     try {
