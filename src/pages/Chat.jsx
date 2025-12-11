@@ -12,7 +12,7 @@ export default function Chat() {
   const [currentRoom, setCurrentRoom] = useState(null);
   const [messages, setMessages] = useState([]);
 
-  // Initialize socket connection
+  // Initialize socket
   useEffect(() => {
     if (!token) return;
 
@@ -22,12 +22,12 @@ export default function Chat() {
     return () => s.disconnect();
   }, [token]);
 
-  // Load messages & handle socket events whenever currentRoom changes
+  // Load messages + listen to socket events
   useEffect(() => {
     if (!socket || !currentRoom) return;
 
-    // Fetch previous messages from backend
-    const fetchMessages = async () => {
+    // Load existing messages from DB
+    const loadMessages = async () => {
       try {
         const res = await fetch(
           `${import.meta.env.VITE_API_URL}/api/messages/${currentRoom._id}`,
@@ -39,6 +39,7 @@ export default function Chat() {
             credentials: "include",
           }
         );
+
         const data = await res.json();
         setMessages(data.messages || []);
       } catch (err) {
@@ -47,27 +48,34 @@ export default function Chat() {
       }
     };
 
-    fetchMessages();
+    loadMessages();
 
-    // Join the room via socket
+    // Join room
     socket.emit("join_room", { roomId: currentRoom._id });
 
-    // Listen for new messages
-    const handleNewMessage = (msg) => setMessages((prev) => [...prev, msg]);
-    socket.on("new_message", handleNewMessage);
+    // When server sends any new message
+    const handleNewMessage = (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    };
 
-    // Cleanup on room change/unmount
+    socket.on("new_message", handleNewMessage);
+    socket.on("new_voice_message", handleNewMessage);
+    socket.on("new_image_message", handleNewMessage);
+
+    // Cleanup
     return () => {
       socket.off("new_message", handleNewMessage);
+      socket.off("new_voice_message", handleNewMessage);
+      socket.off("new_image_message", handleNewMessage);
+
       socket.emit("leave_room", { roomId: currentRoom._id });
     };
   }, [socket, currentRoom, token]);
 
-  // Handle room selection from Sidebar
   const handleRoomChange = (roomId, roomObj) => {
     if (!roomObj) return;
     setCurrentRoom(roomObj);
-    setMessages([]); // will reload messages in useEffect
+    setMessages([]); // Reset, will reload
   };
 
   return (
