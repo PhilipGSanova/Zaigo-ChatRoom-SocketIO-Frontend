@@ -75,6 +75,8 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
   };
 
   // ---------------- IMAGE MESSAGE ----------------
+  console.log("imageInputRef current:", imageInputRef.current);
+
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
