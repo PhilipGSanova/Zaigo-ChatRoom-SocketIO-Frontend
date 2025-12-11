@@ -31,7 +31,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
       createdAt: new Date(),
     };
 
-    addMessage(tempMessage);
+    
 
     socket.emit("send_message", {
       roomId: currentRoom._id,
