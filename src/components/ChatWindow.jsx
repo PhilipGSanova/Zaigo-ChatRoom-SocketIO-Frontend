@@ -61,20 +61,9 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
           reader.onloadend = () => {
             const base64Audio = reader.result;
 
-            const tempMessage = {
-              _id: Date.now(),
-              sender: { _id: user._id, fullName: user.fullName },
-              text: null,
-              attachments: [{
-                url: base64Audio,
-                filename: "voice-message.webm",
-                mime: "audio/webm"
-              }],
-              createdAt: new Date(),
-            };
+            // ❌ DO NOT add message locally — this causes duplicates
 
-            addMessage(tempMessage);
-
+            // ✅ Only emit socket event
             socket.emit("send_voice_message", {
               roomId: currentRoom._id,
               audio: base64Audio
