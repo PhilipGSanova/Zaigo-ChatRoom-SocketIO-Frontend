@@ -127,13 +127,13 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     <div className="chat-window">
       <div className="chat-header">
         {currentRoom.isPrivate
-          ? currentRoom.members.find((m) => m._id !== user._id)?.fullName
+          ? currentRoom.members.find((m) => m._id !== user.id)?.fullName
           : currentRoom.name}
       </div>
 
       <div className="chat-messages">
         {messages.map((msg, i) => (
-          <MessageBubble key={i} msg={msg} currentUserId={user?._id} />
+          <MessageBubble key={i} msg={msg} currentUserId={user?.id} />
         ))}
         <div ref={messagesEndRef} />
       </div>
