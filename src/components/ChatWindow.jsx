@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import MessageBubble from "./MessageBubble";
 import "./ChatWindow.css";
 
@@ -15,19 +15,23 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  if (!currentRoom) {
-    return <div className="chat-window">Select a room or friend to start chatting</div>;
-  }
+  if (!currentRoom) return <div className="chat-window">Select a room to start chatting</div>;
 
   // ---------------- TEXT MESSAGE ----------------
   const sendMessage = () => {
     if (!text.trim()) return;
 
-    // Emit only; server will broadcast back
-    socket.emit("send_message", {
-      roomId: currentRoom._id,
+    const tempMessage = {
+      _id: Date.now(),
+      sender: { _id: user._id, fullName: user.fullName },
       text,
-    });
+      attachments: [],
+      createdAt: new Date(),
+    };
+
+    addMessage(tempMessage); // show instantly
+
+    socket.emit("send_message", { roomId: currentRoom._id, text });
 
     setText("");
   };
@@ -46,6 +50,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
         mediaRecorder.onstop = () => {
           const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
           const reader = new FileReader();
+
           reader.onloadend = () => {
             const base64Audio = reader.result;
 
@@ -54,13 +59,14 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
               audio: base64Audio,
             });
           };
+
           reader.readAsDataURL(audioBlob);
         };
 
         mediaRecorder.start();
         setRecording(true);
       } catch (err) {
-        console.error("Mic access blocked:", err);
+        console.error("Mic blocked:", err);
       }
     } else {
       mediaRecorderRef.current?.stop();
@@ -73,15 +79,17 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
     const file = e.target.files[0];
     if (!file) return;
 
-    // Temporary local preview
+    const tempUrl = URL.createObjectURL(file);
+
     const tempMessage = {
       _id: Date.now(),
       sender: { _id: user._id, fullName: user.fullName },
       text: null,
-      attachments: [{ url: URL.createObjectURL(file), filename: file.name, mime: file.type }],
+      attachments: [{ url: tempUrl, filename: file.name, mime: file.type }],
       createdAt: new Date(),
     };
-    addMessage(tempMessage);
+
+    addMessage(tempMessage); // show instantly
 
     // Upload to backend
     const formData = new FormData();
@@ -91,6 +99,7 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
 
     try {
       const token = localStorage.getItem("token");
+
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/image-upload/image`, {
         method: "POST",
         credentials: "include",
@@ -102,10 +111,9 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
 
       const serverMessage = await res.json();
 
-      // Replace temp with real message
+      // Replace temp message with real message from server
       addMessage(serverMessage, tempMessage._id);
 
-      // ✅ Do NOT emit via socket — server already broadcasts `new_image_message`
     } catch (err) {
       console.error("Image upload error:", err);
     }
@@ -135,7 +143,6 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
         />
         <button onClick={sendMessage}>Send</button>
 
-        {/* IMAGE INPUT */}
         <input
           type="file"
           accept="image/*"
@@ -145,7 +152,6 @@ export default function ChatWindow({ messages, socket, currentRoom, user, addMes
         />
         <button onClick={() => imageInputRef.current?.click()}>📷</button>
 
-        {/* VOICE RECORD */}
         <button className="mic-btn" onClick={toggleRecording}>
           {recording ? "⏹️" : "🎤"}
         </button>

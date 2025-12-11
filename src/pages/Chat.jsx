@@ -53,19 +53,23 @@ export default function Chat() {
     // JOIN room
     socket.emit("join_room", { roomId: currentRoom._id });
 
-    // Receive all message types
-    const onMessage = (msg) => {
-      setMessages((prev) => [...prev, msg]);
+    // ------------------- SOCKET LISTENERS -------------------
+    const handleNewMessage = (msg) => {
+      setMessages((prev) => {
+        // Prevent duplicate messages if temp message already exists
+        if (prev.some((m) => m._id.toString() === msg._id.toString())) return prev;
+        return [...prev, msg];
+      });
     };
 
-    socket.on("new_message", onMessage);
-    socket.on("new_voice_message", onMessage);
-    socket.on("new_image_message", onMessage);
+    socket.on("new_message", handleNewMessage);
+    socket.on("new_voice_message", handleNewMessage);
+    socket.on("new_image_message", handleNewMessage);
 
     return () => {
-      socket.off("new_message", onMessage);
-      socket.off("new_voice_message", onMessage);
-      socket.off("new_image_message", onMessage);
+      socket.off("new_message", handleNewMessage);
+      socket.off("new_voice_message", handleNewMessage);
+      socket.off("new_image_message", handleNewMessage);
 
       socket.emit("leave_room", { roomId: currentRoom._id });
     };
@@ -75,10 +79,11 @@ export default function Chat() {
   const addMessage = (newMessage, replaceTempId = null) => {
     setMessages((prev) => {
       if (replaceTempId) {
-        return prev.map((m) =>
-          m._id === replaceTempId ? newMessage : m
-        );
+        // Replace temporary message with server message
+        return prev.map((m) => (m._id === replaceTempId ? newMessage : m));
       }
+      // Prevent duplicates (if server already sent the message via socket)
+      if (prev.some((m) => m._id.toString() === newMessage._id.toString())) return prev;
       return [...prev, newMessage];
     });
   };
